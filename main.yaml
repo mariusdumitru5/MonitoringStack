@@ -18,7 +18,7 @@
 
 # FASE 3: Configurazione dei singoli servizi
 - name: Step 3A - Setup Prometheus
-  hosts: prometheus_group
+  hosts: monitoring-prometheus_group
   become: true
   tasks:
     - name: Avvia container Prometheus
@@ -31,7 +31,7 @@
           - "9090:9090"
 
 - name: Step 3B - Setup Grafana
-  hosts: grafana_group
+  hosts: monitoring-grafana_group
   become: true
   tasks:
     - name: Avvia container Grafana
@@ -44,7 +44,7 @@
           - "3000:3000"
 
 - name: Step 3C - Setup Elasticsearch
-  hosts: elastic_group
+  hosts: elasticsearch-host_group
   become: true
   tasks:
     - name: Avvia container Elasticsearch
