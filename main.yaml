@@ -1,0 +1,60 @@
+---
+# FASE 1: Creazione delle VM tramite Vagrant su localhost
+- name: Step 1 - Provisioning infrastruttura locale (Vagrant)
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+    - role: vagrant_manager
+      vars:
+        vagrant_start_vms: true
+
+# FASE 2: Installazione Docker su tutte le VM
+- name: Step 2 - Installazione Docker su tutti i nodi
+  hosts: docker_nodes
+  become: true
+  roles:
+    - install_docker
+
+# FASE 3: Configurazione dei singoli servizi
+- name: Step 3A - Setup Prometheus
+  hosts: prometheus_group
+  become: true
+  tasks:
+    - name: Avvia container Prometheus
+      community.docker.docker_container:
+        name: prometheus
+        image: prom/prometheus:latest
+        state: started
+        restart_policy: always
+        published_ports:
+          - "9090:9090"
+
+- name: Step 3B - Setup Grafana
+  hosts: grafana_group
+  become: true
+  tasks:
+    - name: Avvia container Grafana
+      community.docker.docker_container:
+        name: grafana
+        image: grafana/grafana:latest
+        state: started
+        restart_policy: always
+        published_ports:
+          - "3000:3000"
+
+- name: Step 3C - Setup Elasticsearch
+  hosts: elastic_group
+  become: true
+  tasks:
+    - name: Avvia container Elasticsearch
+      community.docker.docker_container:
+        name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+        state: started
+        restart_policy: always
+        env:
+          discovery.type: "single-node"
+          xpack.security.enabled: "false"
+        published_ports:
+          - "9200:9200"

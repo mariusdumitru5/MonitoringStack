@@ -1,0 +1,50 @@
+---
+- name: Assicura che le directory esistano
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ vagrant_dest_dir }}"
+    - "{{ playbook_dir }}/inventory"
+
+- name: Genera il Vagrantfile da template
+  ansible.builtin.template:
+    src: Vagrantfile.j2
+    dest: "{{ vagrant_dest_dir }}/Vagrantfile"
+    mode: '0644'
+
+- name: Genera il file di inventory hosts.yml da template
+  ansible.builtin.template:
+    src: inventory.yml.j2
+    dest: "{{ playbook_dir }}/inventory/hosts.yml"
+    mode: '0644'
+
+- name: Registra dinamicamente gli host in memoria per questo run
+  ansible.builtin.add_host:
+    name: "{{ item.name }}"
+    groups:
+      - docker_nodes
+      - "{{ item.name }}_group"
+    ansible_host: "{{ item.ip }}"
+    ansible_user: vagrant
+    ansible_ssh_private_key_file: "{{ playbook_dir }}/vagrant_env/.vagrant/machines/{{ item.name }}/virtualbox/private_key"
+  loop: "{{ vagrant_vms }}"
+
+- name: Avvia le macchine virtuali con Vagrant (se abilitato)
+  ansible.builtin.command:
+    cmd: vagrant up
+    chdir: "{{ vagrant_dest_dir }}"
+  when: vagrant_start_vms | bool
+  register: vagrant_up_out
+  changed_when: "'Machine booted and ready' in vagrant_up_out.stdout or 'Starting' in vagrant_up_out.stdout"
+
+- name: Attendi che il servizio SSH sia pronto su tutte le VM
+  ansible.builtin.wait_for:
+    host: "{{ item.ip }}"
+    port: 22
+    state: started
+    delay: 5
+    timeout: 300
+  loop: "{{ vagrant_vms }}"
+  when: vagrant_start_vms | bool

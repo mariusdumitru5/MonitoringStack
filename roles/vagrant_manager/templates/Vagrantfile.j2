@@ -1,0 +1,21 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+{% for vm in vagrant_vms %}
+  config.vm.define "{{ vm.name }}" do |node|
+    node.vm.box = "{{ vm.box | default(vagrant_box_default) }}"
+    node.vm.hostname = "{{ vm.name }}"
+    {% if vm.ip is defined %}
+    node.vm.network "private_network", ip: "{{ vm.ip }}"
+    {% endif %}
+    
+    node.vm.provider "virtualbox" do |vb|
+      vb.memory = "{{ vm.ram | default(vagrant_ram_default) }}"
+      vb.cpus = "{{ vm.cpus | default(vagrant_cpus_default) }}"
+    end
+  end
+{% endfor %}
+
+end

@@ -1,0 +1,20 @@
+---
+# Directory di destinazione dove verrà creato il Vagrantfile
+vagrant_dest_dir: "{{ playbook_dir }}/vagrant_env"
+
+# Valori di default generici
+vagrant_box_default: "ubuntu/jammy64"
+vagrant_ram_default: 1024
+vagrant_cpus_default: 1
+
+# Flag per avviare o meno le VM dopo la generazione del Vagrantfile
+vagrant_start_vms: true
+
+# Elenco delle macchine virtuali da configurare
+vagrant_vms:
+  - name: "monitoring-prometheus"
+    ip: "192.168.56.10"
+  - name: "monitoring-grafana"
+    ip: "192.168.56.11"
+  - name: "elasticsearch-host"
+    ip: "192.168.56.12"
