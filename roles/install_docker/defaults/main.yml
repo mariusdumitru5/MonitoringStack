@@ -1,5 +1,5 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for install_docker
-users:
+docker_users:
   - vagrant

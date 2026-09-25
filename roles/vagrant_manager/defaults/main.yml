@@ -3,7 +3,7 @@
 vagrant_dest_dir: "{{ playbook_dir }}/vagrant_env"
 
 # Valori di default generici
-vagrant_box_default: "ubuntu/jammy64"
+vagrant_box_default: "generic/rocky9"
 vagrant_ram_default: 1024
 vagrant_cpus_default: 1
 
