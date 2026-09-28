@@ -1,0 +1,6 @@
+---
+- name: Configure Node Exporter on all VMs
+  hosts: docker_nodes
+  become: true
+  roles:
+    - node_exporter

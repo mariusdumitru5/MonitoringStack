@@ -1,0 +1,6 @@
+---
+- name: Deploy Grafana su monitoring-grafana
+  hosts: monitoring-grafana_group
+  become: true
+  roles:
+    - grafana

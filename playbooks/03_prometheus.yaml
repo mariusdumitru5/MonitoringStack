@@ -1,0 +1,6 @@
+---
+- name: Deploy Prometheus su monitoring-prometheus
+  hosts: monitoring-prometheus_group
+  become: true
+  roles:
+    - prometheus

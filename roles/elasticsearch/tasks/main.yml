@@ -1,0 +1,41 @@
+---
+- name: Imposta vm.max_map_count per Elasticsearch
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    state: present
+    reload: true
+
+- name: Crea cartella host per il bind mount jvm.options.d
+  ansible.builtin.file:
+    path: /opt/elasticsearch/jvm.options.d
+    state: directory
+    mode: '0777'
+
+- name: Crea cartella host per la persistenza dati
+  ansible.builtin.file:
+    path: /opt/elasticsearch/data
+    state: directory
+    mode: '0777'
+
+- name: Genera file jvm heap (1G)
+  ansible.builtin.template:
+    src: heap.options.j2
+    dest: /opt/elasticsearch/jvm.options.d/heap.options
+    mode: '0644'
+
+- name: Deploy container Elasticsearch
+  community.docker.docker_container:
+    name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    state: started
+    restart_policy: always
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    env:
+      discovery.type: "single-node"
+      xpack.security.enabled: "false"
+    volumes:
+      - /opt/elasticsearch/jvm.options.d:/usr/share/elasticsearch/config/jvm.options.d:ro
+      - /opt/elasticsearch/data:/usr/share/elasticsearch/data

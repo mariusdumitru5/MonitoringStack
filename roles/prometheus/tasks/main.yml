@@ -1,0 +1,30 @@
+---
+- name: Crea directory di configurazione e dati per Prometheus
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0777'
+  loop:
+    - /opt/prometheus
+    - /opt/prometheus/data
+
+- name: Configura prometheus.yml con i 3 target Node Exporter
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: /opt/prometheus/prometheus.yml
+    mode: '0644'
+
+- name: Deploy container Prometheus con volume persistente
+  community.docker.docker_container:
+    name: prometheus
+    image: prom/prometheus:latest
+    state: started
+    restart_policy: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - /opt/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - /opt/prometheus/data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'

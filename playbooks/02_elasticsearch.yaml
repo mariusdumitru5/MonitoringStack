@@ -1,0 +1,6 @@
+---
+- name: Deploy Elasticsearch su elasticsearch-host
+  hosts: elasticsearch-host_group
+  become: true
+  roles:
+    - elasticsearch
